@@ -18,10 +18,16 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.Landmark;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -52,6 +58,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private volatile Face mFace;
     private int mFaceId;
     private float mFaceHappiness;
+    private HashMap<Integer,LandmarkDescription> landmarkMap;
 
     FaceGraphic(GraphicOverlay overlay) {
         super(overlay);
@@ -70,6 +77,21 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setColor(selectedColor);
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+
+        landmarkMap = new HashMap<>();
+        landmarkMap.put(Landmark.BOTTOM_MOUTH,new LandmarkDescription("Bottom mouth",Color.GREEN));
+        landmarkMap.put(Landmark.LEFT_CHEEK,new LandmarkDescription("Left Cheek"));
+        landmarkMap.put(Landmark.LEFT_EAR,new LandmarkDescription("Left Ear"));
+        landmarkMap.put(Landmark.LEFT_EAR_TIP,new LandmarkDescription("Left ear tip"));
+        landmarkMap.put(Landmark.LEFT_EYE,new LandmarkDescription("left eye",Color.RED));
+        landmarkMap.put(Landmark.LEFT_MOUTH,new LandmarkDescription("left mouth",Color.GREEN));
+        landmarkMap.put(Landmark.NOSE_BASE,new LandmarkDescription("nose base",Color.BLUE));
+        landmarkMap.put(Landmark.RIGHT_CHEEK,new LandmarkDescription("right cheek"));
+        landmarkMap.put(Landmark.RIGHT_EAR,new LandmarkDescription("right ear"));
+        landmarkMap.put(Landmark.LEFT_CHEEK,new LandmarkDescription("left cheek"));
+        landmarkMap.put(Landmark.RIGHT_EAR_TIP,new LandmarkDescription("right ear tip"));
+        landmarkMap.put(Landmark.RIGHT_EYE,new LandmarkDescription("right eye",Color.RED));
+        landmarkMap.put(Landmark.RIGHT_MOUTH,new LandmarkDescription("right mouth",Color.GREEN));
     }
 
     void setId(int id) {
@@ -113,5 +135,14 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float right = x + xOffset;
         float bottom = y + yOffset;
         canvas.drawRect(left, top, right, bottom, mBoxPaint);
+        List<Landmark> komponenWajah = face.getLandmarks();
+        canvas.drawCircle(0,0,10,mFacePositionPaint);
+        for(Landmark landmark: komponenWajah){
+            PointF point = landmark.getPosition();
+            Paint mLandmark = new Paint();
+            mLandmark.setColor(landmarkMap.get(landmark.getType()).color);
+            canvas.drawCircle(translateX(point.x),translateY(point.y),5,mLandmark);
+            Log.d("facegraphic",landmarkMap.get(landmark.getType()).name);
+        }
     }
 }
