@@ -23,9 +23,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,8 +64,13 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private float mFaceHappiness;
     private HashMap<Integer,LandmarkDescription> landmarkMap;
 
-    FaceGraphic(GraphicOverlay overlay) {
+    private CameraSource mCamera;
+    private boolean photoTaken;
+
+    FaceGraphic(GraphicOverlay overlay, CameraSource camera) {
         super(overlay);
+
+        mCamera = camera;
 
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
@@ -123,7 +132,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float y = translateY(face.getPosition().y + face.getHeight() / 2);
         canvas.drawCircle(x, y, FACE_POSITION_RADIUS, mFacePositionPaint);
         canvas.drawText("id: " + mFaceId, x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
-        canvas.drawText("happiness: " + String.format("%.2f", face.getIsSmilingProbability()), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
         canvas.drawText("right eye: " + String.format("%.2f", face.getIsRightEyeOpenProbability()), x + ID_X_OFFSET * 2, y + ID_Y_OFFSET * 2, mIdPaint);
         canvas.drawText("left eye: " + String.format("%.2f", face.getIsLeftEyeOpenProbability()), x - ID_X_OFFSET*2, y - ID_Y_OFFSET*2, mIdPaint);
 
@@ -144,5 +152,32 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             canvas.drawCircle(translateX(point.x),translateY(point.y),5,mLandmark);
             Log.d("facegraphic",landmarkMap.get(landmark.getType()).name);
         }
+
+        canvas.drawText((isEligibleImage(komponenWajah)?"y":"n"), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
+        if((isEligibleImage(komponenWajah))&&!photoTaken){
+            mCamera.takePicture(new CameraSource.ShutterCallback() {
+                @Override
+                public void onShutter() {
+
+                }
+            }, new FacePictureCallback());
+            photoTaken = true;
+        }
+    }
+
+    private boolean isEligibleImage(List<Landmark> landmarks){
+        boolean eyePresent, nosePresent, mouthPresent;
+        eyePresent = nosePresent = mouthPresent = false;
+        for(Landmark landmark:landmarks){
+            int landmarkType = landmark.getType();
+            if ((landmarkType==Landmark.LEFT_EYE)||(landmarkType==Landmark.RIGHT_EYE))
+                eyePresent = true;
+            else if ((landmarkType==Landmark.BOTTOM_MOUTH)||(landmarkType==Landmark.LEFT_MOUTH)||
+                    (landmarkType==Landmark.RIGHT_MOUTH))
+                mouthPresent = true;
+            else if ((landmarkType==Landmark.NOSE_BASE))
+                nosePresent = true;
+        }
+        return (eyePresent&&mouthPresent&&nosePresent);
     }
 }
