@@ -38,8 +38,11 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.vision.face.Landmark;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -280,10 +283,25 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private class GraphicFaceTracker extends Tracker<Face> {
         private GraphicOverlay mOverlay;
         private FaceGraphic mFaceGraphic;
+        private HashMap<Integer,String> landmarkMap;
 
         GraphicFaceTracker(GraphicOverlay overlay) {
             mOverlay = overlay;
             mFaceGraphic = new FaceGraphic(overlay);
+            landmarkMap = new HashMap<>();
+            landmarkMap.put(Landmark.BOTTOM_MOUTH,"Bottom mouth");
+            landmarkMap.put(Landmark.LEFT_CHEEK,"Left Cheek");
+            landmarkMap.put(Landmark.LEFT_EAR,"Left Ear");
+            landmarkMap.put(Landmark.LEFT_EAR_TIP,"Left ear tip");
+            landmarkMap.put(Landmark.LEFT_EYE,"left eye");
+            landmarkMap.put(Landmark.LEFT_MOUTH,"left mouth");
+            landmarkMap.put(Landmark.NOSE_BASE,"nose base");
+            landmarkMap.put(Landmark.RIGHT_CHEEK,"right cheek");
+            landmarkMap.put(Landmark.RIGHT_EAR,"right ear");
+            landmarkMap.put(Landmark.LEFT_CHEEK,"left cheek");
+            landmarkMap.put(Landmark.RIGHT_EAR_TIP,"right ear tip");
+            landmarkMap.put(Landmark.RIGHT_EYE,"right eye");
+            landmarkMap.put(Landmark.RIGHT_MOUTH,"right mouth");
         }
 
         /**
@@ -291,6 +309,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
          */
         @Override
         public void onNewItem(int faceId, Face item) {
+            Log.d("facedetect","new face detected");
+            List<Landmark> landmarks = item.getLandmarks();
+            for(Landmark landmark:landmarks){
+                int landmarkid = landmark.getType();
+                Log.d("facedetect","landmark "+landmarkMap.get(landmarkid));
+            }
             mFaceGraphic.setId(faceId);
         }
 

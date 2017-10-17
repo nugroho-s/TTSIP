@@ -18,8 +18,11 @@ package com.google.android.gms.samples.vision.face.facetracker.ui.camera;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity;
 import com.google.android.gms.vision.CameraSource;
 
 import java.util.HashSet;
