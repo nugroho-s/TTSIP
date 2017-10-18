@@ -60,6 +60,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
+    public static FaceTrackerActivity sInstance;
+
     //==============================================================================================
     // Activity Methods
     //==============================================================================================
@@ -83,6 +85,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         } else {
             requestCameraPermission();
         }
+
+        sInstance = this;
     }
 
     /**

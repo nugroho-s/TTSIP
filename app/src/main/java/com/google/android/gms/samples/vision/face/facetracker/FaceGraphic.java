@@ -155,12 +155,14 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
         canvas.drawText((isEligibleImage(komponenWajah)?"y":"n"), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
         if((isEligibleImage(komponenWajah))&&!photoTaken){
+            FacePictureCallback callback = new FacePictureCallback(x-xOffset,y-yOffset,
+                    face.getWidth()+(2*xOffset),face.getHeight()+(2*yOffset));
             mCamera.takePicture(new CameraSource.ShutterCallback() {
                 @Override
                 public void onShutter() {
 
                 }
-            }, new FacePictureCallback());
+            }, callback);
             photoTaken = true;
         }
     }
