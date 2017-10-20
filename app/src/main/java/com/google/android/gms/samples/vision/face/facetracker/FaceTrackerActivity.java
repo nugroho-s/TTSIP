@@ -50,6 +50,7 @@ import java.util.List;
  */
 public final class FaceTrackerActivity extends AppCompatActivity {
     private static final String TAG = "FaceTracker";
+    private static final Integer CAMERA_MODE = CameraSource.CAMERA_FACING_FRONT;
 
     private CameraSource mCameraSource = null;
 
@@ -149,7 +150,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         mCameraSource = new CameraSource.Builder(context, faceDetectorWrapper)
                 .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_FRONT)
+                .setFacing(CAMERA_MODE)
                 .setRequestedFps(30.0f)
                 .build();
 

@@ -30,7 +30,7 @@ public class FacePictureCallback implements CameraSource.PictureCallback {
         Log.d(logId,"called callback "+count++);
         Bitmap temp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         temp = flip(temp);
-        LastPhotoWrapper.bitmap = drawRectangle(temp,x,y,width,height);
+        LastPhotoWrapper.bitmap = temp;
 
 //        Log.d(logId, String.format("%d,%d - %d %d",x,y,width,height));
         Intent intent = new Intent(FaceTrackerActivity.sInstance, PhotoActivity.class);

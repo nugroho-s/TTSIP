@@ -18,6 +18,7 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,6 +31,8 @@ import com.google.android.gms.vision.face.Landmark;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,6 +58,8 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     };
     private static int mCurrentColorIndex = 0;
 
+    ArrayList<FacePropertiesWrapper> wajahOrang;
+
     private Paint mFacePositionPaint;
     private Paint mIdPaint;
     private Paint mBoxPaint;
@@ -66,9 +71,15 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
     private CameraSource mCamera;
     private boolean photoTaken;
+    private String tebakan = "unknown";
 
     FaceGraphic(GraphicOverlay overlay, CameraSource camera) {
         super(overlay);
+
+        wajahOrang = new ArrayList<>();
+        wajahOrang.add(new FacePropertiesWrapper("Nugroho",144,264.0303,244.1311,238.73));
+        wajahOrang.add(new FacePropertiesWrapper("Majid",144.0555,248.03226,221.7747,206.4946));
+        wajahOrang.add(new FacePropertiesWrapper("Febi",124,220.1454,199.2787,190.0316));
 
         mCamera = camera;
 
@@ -144,42 +155,82 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float bottom = y + yOffset;
         canvas.drawRect(left, top, right, bottom, mBoxPaint);
         List<Landmark> komponenWajah = face.getLandmarks();
+        HashMap<Integer,Landmark> isPresent = new HashMap<>();
         canvas.drawCircle(0,0,10,mFacePositionPaint);
         for(Landmark landmark: komponenWajah){
             PointF point = landmark.getPosition();
             Paint mLandmark = new Paint();
             mLandmark.setColor(landmarkMap.get(landmark.getType()).color);
+            isPresent.put(landmark.getType(),landmark);
             canvas.drawCircle(translateX(point.x),translateY(point.y),5,mLandmark);
             Log.d("facegraphic",landmarkMap.get(landmark.getType()).name);
         }
 
-        canvas.drawText((isEligibleImage(komponenWajah)?"y":"n"), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
-        if((isEligibleImage(komponenWajah))&&!photoTaken){
-            FacePictureCallback callback = new FacePictureCallback(x-xOffset,y-yOffset,
-                    face.getWidth()+(2*xOffset),face.getHeight()+(2*yOffset));
-            mCamera.takePicture(new CameraSource.ShutterCallback() {
-                @Override
-                public void onShutter() {
+        if(isEligibleImage(isPresent))
+            tebakOrang(isPresent);
+        canvas.drawText(tebakan, x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
+//        if((isEligibleImage(isPresent))&&!photoTaken){
+//            FacePictureCallback callback = new FacePictureCallback(x-xOffset,y-yOffset,
+//                    face.getWidth()+(2*xOffset),face.getHeight()+(2*yOffset));
+//            mCamera.takePicture(() -> {}, callback);
+//            photoTaken = true;
+//        }
+    }
 
-                }
-            }, callback);
-            photoTaken = true;
+    private boolean isEligibleImage(HashMap<Integer, Landmark> isPresent){
+        boolean eyePresent, nosePresent, mouthPresent;
+        eyePresent = isPresent.containsKey(Landmark.RIGHT_EYE)&&isPresent.containsKey(Landmark.LEFT_EYE);
+        nosePresent = isPresent.containsKey(Landmark.NOSE_BASE);
+        mouthPresent = isPresent.containsKey(Landmark.BOTTOM_MOUTH);
+        return (eyePresent&&mouthPresent&&nosePresent);
+    }
+
+    public String tebakOrang(HashMap<Integer,Landmark> isPresent){
+        Landmark leftEye = isPresent.get(Landmark.LEFT_EYE);
+        Landmark rightEye = isPresent.get(Landmark.RIGHT_EYE);
+        Landmark nose = isPresent.get(Landmark.NOSE_BASE);
+        Landmark mouth = isPresent.get(Landmark.BOTTOM_MOUTH);
+        double eyeDist = Math.hypot((leftEye.getPosition().x-rightEye.getPosition().x),
+                (leftEye.getPosition().y-rightEye.getPosition().y));
+        double noseMouthDist = Math.hypot((nose.getPosition().x-mouth.getPosition().x),
+                (nose.getPosition().y-mouth.getPosition().y));
+        double leftEyeNoseDist = Math.hypot((leftEye.getPosition().x-nose.getPosition().x),
+                (leftEye.getPosition().y-nose.getPosition().y));
+        double rightEyeNoseDist = Math.hypot((rightEye.getPosition().x-nose.getPosition().x),
+                (rightEye.getPosition().y-nose.getPosition().y));
+        FacePropertiesWrapper orang = new FacePropertiesWrapper("temp",noseMouthDist,eyeDist,leftEyeNoseDist,rightEyeNoseDist);
+
+        ArrayList<DifferenceWrapper> diffs = new ArrayList<>();
+
+        for(FacePropertiesWrapper x:wajahOrang){
+            diffs.add(new DifferenceWrapper(x.label,x.difference(orang)));
+        }
+
+        Collections.sort(diffs,new DifferenceWrapperComparator());
+
+        tebakan = (diffs.get(0).diff<50)?diffs.get(0).label:tebakan;
+
+        return tebakan;
+    }
+
+    class DifferenceWrapper{
+        String label;
+        double diff;
+
+        public DifferenceWrapper(String label, double diff) {
+            this.label = label;
+            this.diff = diff;
         }
     }
 
-    private boolean isEligibleImage(List<Landmark> landmarks){
-        boolean eyePresent, nosePresent, mouthPresent;
-        eyePresent = nosePresent = mouthPresent = false;
-        for(Landmark landmark:landmarks){
-            int landmarkType = landmark.getType();
-            if ((landmarkType==Landmark.LEFT_EYE)||(landmarkType==Landmark.RIGHT_EYE))
-                eyePresent = true;
-            else if ((landmarkType==Landmark.BOTTOM_MOUTH)||(landmarkType==Landmark.LEFT_MOUTH)||
-                    (landmarkType==Landmark.RIGHT_MOUTH))
-                mouthPresent = true;
-            else if ((landmarkType==Landmark.NOSE_BASE))
-                nosePresent = true;
+    public class DifferenceWrapperComparator implements Comparator<DifferenceWrapper> {
+        @Override
+        public int compare(DifferenceWrapper o1, DifferenceWrapper o2) {
+            if(o1.diff==o2.diff)
+                return 0;
+            if(o1.diff>o2.diff)
+                return 1;
+            return -1;
         }
-        return (eyePresent&&mouthPresent&&nosePresent);
     }
 }
