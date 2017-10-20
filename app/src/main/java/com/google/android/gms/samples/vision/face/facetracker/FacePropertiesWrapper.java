@@ -5,6 +5,7 @@ package com.google.android.gms.samples.vision.face.facetracker;
 
 public class FacePropertiesWrapper {
     public String label;
+    public SimplifiedChainCode chainCode;
     public double eyesDistance;
     public double leftEyeNoseDistance;
     public double rightEyeNoseDistance;
