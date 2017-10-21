@@ -1,7 +1,6 @@
 package com.google.android.gms.samples.vision.face.facetracker;
 
 import android.media.FaceDetector;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.vision.Detector;

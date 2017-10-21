@@ -30,7 +30,7 @@
             android:value="face" />
 
         <activity
-            android:name=".FaceTrackerActivity"
+            android:name="com.google.android.gms.samples.vision.face.com.nugroho.facetracker.FaceTrackerActivity"
             android:icon="@drawable/icon"
             android:label="Face Tracker"
             android:screenOrientation="fullSensor"
@@ -41,7 +41,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PhotoActivity"></activity>
+        <activity android:name="com.google.android.gms.samples.vision.face.com.nugroho.facetracker.PhotoActivity"></activity>
     </application>
 
 </manifest>
