@@ -20,4 +20,8 @@
 
   </com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview>
 
+  <Button
+      android:layout_width="wrap_content"
+      android:layout_height="10dp" />
+
 </LinearLayout>

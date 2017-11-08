@@ -47,27 +47,27 @@ public class PhotoActivity extends AppCompatActivity {
         sInstance = this;
         bitmap = LastPhotoWrapper.bitmap;
         FaceDetector detector = new FaceDetector.Builder(this)
-                .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .build();
+        FaceDetectorWrapper faceDetectorWrapper = new FaceDetectorWrapper(detector);
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
         faces = detector.detect(frame);
 
         overlay = (FaceView) findViewById(R.id.faceView);
         proses = (Button) findViewById(R.id.prosesButton);
         bwImage = (ImageView) findViewById(R.id.bwImage);
-        proses.setOnClickListener((View view)->{
-            try {
-                future.get();
-                bwImage.setImageBitmap(bwBitmap);
-                overlay.setVisibility(View.GONE);
-                proses.setVisibility(View.GONE);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                Log.e("Exception","",e);
-            }
-        });
+//        proses.setOnClickListener((View view)->{
+//            try {
+//                future.get();
+//                bwImage.setImageBitmap(bwBitmap);
+//                overlay.setVisibility(View.GONE);
+//                proses.setVisibility(View.GONE);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                Log.e("Exception","",e);
+//            }
+//        });
         new ConverttoGrayAsync(this).execute(bitmap);
     }
 
@@ -96,16 +96,16 @@ public class PhotoActivity extends AppCompatActivity {
             paint.setColorFilter(f);
             c.drawBitmap(bitmaps[0], 0, 0, paint);
 
-            ExecutorService executor = Executors.newFixedThreadPool(1);
-            Callable<Bitmap> task = () -> {
-                try{
-                    bwBitmap = new OtsuThresholder().getBW(bmpGrayscale);
-                } catch (Exception e){
-                    Log.e("Exception","",e);
-                }
-                return bwBitmap;
-            };
-            future = executor.submit(task);
+//            ExecutorService executor = Executors.newFixedThreadPool(1);
+//            Callable<Bitmap> task = () -> {
+//                try{
+//                    bwBitmap = new OtsuThresholder().getBW(bmpGrayscale);
+//                } catch (Exception e){
+//                    Log.e("Exception","",e);
+//                }
+//                return bwBitmap;
+//            };
+//            future = executor.submit(task);
             return bmpGrayscale;
         }
 

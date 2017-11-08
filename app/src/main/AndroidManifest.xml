@@ -30,7 +30,7 @@
             android:value="face" />
 
         <activity
-            android:name="com.google.android.gms.samples.vision.face.com.nugroho.facetracker.FaceTrackerActivity"
+            android:name=".FaceTrackerActivity"
             android:icon="@drawable/icon"
             android:label="Face Tracker"
             android:screenOrientation="fullSensor"
@@ -41,7 +41,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.google.android.gms.samples.vision.face.com.nugroho.facetracker.PhotoActivity"></activity>
+        <activity android:name=".PhotoActivity" />
+        <activity android:name=".PhotoSelectorActivity"
+            android:icon="@drawable/icon"
+            android:label="Muka Persegi">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

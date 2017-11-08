@@ -33,8 +33,23 @@ import com.google.android.gms.vision.face.Landmark;
  * locations of detected facial landmarks.
  */
 public class FaceView extends View {
+    private static final float BOX_STROKE_WIDTH = 5.0f;
+    private static final float ID_Y_OFFSET = 50.0f;
+    private static final float ID_X_OFFSET = -50.0f;
+    private static final float ID_TEXT_SIZE = 40.0f;
+
     private Bitmap mBitmap;
     private SparseArray<Face> mFaces;
+
+    private static final int COLOR_CHOICES[] = {
+            Color.BLUE,
+            Color.CYAN,
+            Color.GREEN,
+            Color.MAGENTA,
+            Color.RED,
+            Color.WHITE,
+            Color.YELLOW
+    };
 
     public FaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -86,18 +101,46 @@ public class FaceView extends View {
      * pupil position.
      */
     private void drawFaceAnnotations(Canvas canvas, double scale) {
+        Paint mBoxPaint = new Paint();
+        mBoxPaint.setStyle(Paint.Style.STROKE);
+        mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
 
+        Paint mIdPaint = new Paint();
+        mIdPaint.setTextSize(ID_TEXT_SIZE);
+
+        canvas.drawCircle(0, 0, 10, paint);
+
         for (int i = 0; i < mFaces.size(); ++i) {
             Face face = mFaces.valueAt(i);
+            mBoxPaint.setColor(COLOR_CHOICES[i%COLOR_CHOICES.length]);
+            mIdPaint.setColor(COLOR_CHOICES[i%COLOR_CHOICES.length]);
+            // Draws a bounding box around the face.
+            float x = (face.getPosition().x + face.getWidth() / 2);
+            float y = (face.getPosition().y + face.getHeight() / 2);
+            float xOffset = (face.getWidth() / 2.0f);
+            float yOffset = (face.getHeight() / 2.0f);
+            float left = x - xOffset;
+            float top = y - yOffset;
+            float right = x + xOffset;
+            float bottom = y + yOffset;
+            left *= scale;
+            top *= scale;
+            right *= scale;
+            bottom *= scale;
+            canvas.drawRect(left, top, right, bottom, mBoxPaint);
             for (Landmark landmark : face.getLandmarks()) {
-                int cx = (int) (landmark.getPosition().x * scale);
-                int cy = (int) (landmark.getPosition().y * scale);
-                canvas.drawCircle(cx, cy, 10, paint);
+                if (landmark.getType() == Landmark.NOSE_BASE){
+                    int cx = (int) (landmark.getPosition().x * scale);
+                    int cy = (int) (landmark.getPosition().y * scale);
+                    canvas.drawCircle(cx, cy, 10, paint);
+                }
             }
+            canvas.drawText(FaceClassifier.classifyFace(face), (float) ((x - ID_X_OFFSET)*scale), (float) ((y - ID_Y_OFFSET)*scale), mIdPaint);
         }
     }
 }
